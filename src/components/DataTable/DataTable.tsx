@@ -1,6 +1,17 @@
-import React from 'react';
+import React, {useState} from 'react';
 import Box from '@mui/material/Box';
-import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
+import { DataGrid, GridColDef, GridValueGetterParams, GridSelectionModel } from '@mui/x-data-grid';
+import { serverCalls } from '../../api';
+import { useGetData } from '../../custom-hooks';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle
+} from '@mui/material'
+import { CarForm } from '../../components'
 
 const columns: GridColDef[] = [
   { field: 'id', headerName: 'ID', width: 90 },
@@ -22,33 +33,88 @@ const columns: GridColDef[] = [
     type: 'number',
     width: 110,
     editable: true,
+  },
+  {
+    field: 'top_speed',
+    headerName: 'top_speed',
+    width: 90
+  },
+  {
+    field: 'max_horsepower',
+    headerName: 'max_horsepower',
+    width: 90
+  },
+  {
+    field: 'seats',
+    headerName: 'seats',
+    width: 90
+  },
+  {
+    field: 'price',
+    headerName: 'price',
+    width: 90
+  },
+  {
+    field: 'length',
+    headerName: 'length',
+    width: 90
+  },
+  {
+    field: 'country',
+    headerName: 'country',
+    width: 90
   }
   
 ];
 
-const rows = [
-  { id: 1, make: 'Honda', model: 'Accord', year: 2018 },
-  { id: 2, make: 'BMW', model: '128T1', year: 2021 },
-  { id: 3, make: 'Ferarri', model: 'F8', year: 2020 },
-  { id: 4, make: 'Toyota', model: 'Camry', year: 2022 },
-  { id: 5, make: 'Infinity', model: 'QX50', year: 2022 },
-  { id: 6, make: 'Ford', model: 'GT', year: 2020 },
-  { id: 7, make: 'Fiat', model: '124 Spider', year: 2018 },
-  { id: 8, make: 'Lincoln', model: 'Nautilus', year: 2021 },
-  { id: 9, make: 'Mitsubishi', model: 'Outlander', year: 2022 },
-];
+interface gridData{
+  data:{
+    id?:string;
+    name?:string;
+  }
+}
 
 export const DataTable = () => {
+  let { carData, getData } = useGetData();
+  let [open, setOpen] = useState(false);
+  let [gridData, setData] = useState<GridSelectionModel>([])
+
+  let handleOpen = () => setOpen(true);
+  let handleClose = () => setOpen(false);
+
+  let deleteData = async () =>{
+    await serverCalls.delete(`${gridData[0]}`)
+    getData();
+  }
+  console.log(gridData) 
+  
   return (
     <Box sx={{ height: 400, width: '100%' }}>
       <DataGrid
-        rows={rows}
+        rows={carData}
         columns={columns}
         pageSize={5}
         rowsPerPageOptions={[5]}
         checkboxSelection
         disableSelectionOnClick
+        onSelectionModelChange={newSelectionModel =>setData(newSelectionModel)}
+        {...carData}
       />
+      <Button onClick={handleOpen}>Update</Button>
+        <Button variant="contained" color="secondary" onClick={deleteData}>Delete</Button>
+
+          {/*Dialog Pop Up begin */}
+        <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+          <DialogTitle id="form-dialog-title">Update A Car</DialogTitle>
+          <DialogContent>
+            <DialogContentText>Car id: {gridData[0]}</DialogContentText>
+              <CarForm id={`${gridData[0]}`}/>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick = {handleClose} color="warning" variant='contained'>Cancel</Button>
+            {/* <Button onClick={handleClose} color = "primary">Done</Button>  */}
+          </DialogActions>
+        </Dialog>
     </Box>
   );
 }

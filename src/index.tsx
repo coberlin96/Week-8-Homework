@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { ThemeProvider } from '@mui/material/styles';
+import { Provider } from 'react-redux';
+import { store } from './redux/store';
 import { theme } from './Theme/themes'
 import { Home, Dashboard, Signin } from './components'
 import './styles.css'
@@ -13,13 +15,17 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <Router>
-      <Routes>
-        <Route path='/' element={< Home title = {'car.inventory'}/>}/>
-        <Route path='/dashboard' element={<Dashboard />}/>
-        <Route path='/signin' element={<Signin/>}/>
-      </Routes>
-    </Router>
+    <Provider store = {store}>
+      <ThemeProvider theme ={theme}>
+        <Router>
+          <Routes>
+            <Route path='/' element={< Home title = {'car.inventory'}/>}/>
+            <Route path='/dashboard' element={<Dashboard />}/>
+            <Route path = '/signin' element={<Signin/>}/>
+          </Routes>
+        </Router>
+      </ThemeProvider>
+    </Provider>
   </React.StrictMode>
 );
 
